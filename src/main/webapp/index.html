@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+<meta charset="UTF-8">
+<title>Chat via EAP WebSockets</title>
+</head>
+<body>
+	<div data-role="page" id="page-1">
+		<div data-role="header">
+			<h1>Chat</h1>
+		</div>
+		<div data-role="content">
+			<div class="ui-field-contain">
+				<label for="msgField">Message</label>
+				<input name="msgField" id="msgField" data-clear-btn="true" value="" type="text"/>
+				<p/>
+				<a href="" id="btnSend" class="ui-btn ui-corner-all">Send</a>
+			</div>
+			<br>
+			<ul data-role="listview" id="msgs">
+			</ul>
+		</div>
+		<div data-role="footer">
+			<h4>Chat</h4>
+		</div>
+	</div>
+	<script type="text/javascript">
+	$( document ).ready(function() {
+	    console.log( "Ready!" );
+	    
+	    var wsURI = 'ws://' + window.location.host + '/jboss-websocket-simplechat/websocket/chat';
+	    websocket = new WebSocket(wsURI);
+
+	    websocket.onopen = function() {
+	        console.log("open");
+	    };
+	    websocket.onmessage = function(event) {
+	        // log the event              
+	        console.log("response: " + event.data);  
+	        // add to ListView
+	        $("#msgs").append("<li>" + event.data + "</li>");
+		    $("#msgs").listview("refresh");
+	    };
+	    websocket.onerror = function(event) {
+	        // log the event
+	        console.log("error: " + event.data);
+	    };
+	    websocket.onclose = function() {
+	        console.log("closed");
+	    };
+
+	    // event handler for Send button
+	    $("#btnSend").on("click", function(e) {
+			console.log("btnSend: " + $('#msgField').val());	      
+            if (websocket !== null) {
+                var content = $('#msgField').val();
+                websocket.send(content);
+            } else {
+                console.log("no websocket?");
+            }
+		  
+		});
+
+	});
+        
+	</script>
+</body>
+</html>
